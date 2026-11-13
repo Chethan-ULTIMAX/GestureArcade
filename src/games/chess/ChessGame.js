@@ -569,7 +569,18 @@ export class ChessGame {
     const hands = result.landmarks || [];
     this.drawHandOverlay(hands);
     if (!hands.length) {
-      if (performance.now() - this.lastHandSeen > 180) this.cursor.classList.remove("is-visible");
+      const lostFor = performance.now() - this.lastHandSeen;
+      if (lostFor > 180) this.cursor.classList.remove("is-visible");
+      if (lostFor > 320 && this.pinchActive) {
+        this.pinchActive = false;
+        this.pinchStartFrames = 0;
+        this.pinchEndFrames = 0;
+        this.cursor.classList.remove("is-pinching");
+        this.hideHeldPiece();
+        this.gestureFrom = null;
+        this.gestureTarget = null;
+        this.showToast("Hand tracking lost. The selected piece is safe; pinch again to continue.");
+      }
       return;
     }
 
@@ -643,16 +654,23 @@ export class ChessGame {
     const point = this.cursorPoint;
     if (!point) return;
     const square = this.squareAtPoint(point.x, point.y);
-    if (!this.selected) {
-      if (square && this.selectSquare(square, true)) {
+    if (!square) return;
+
+    if (!this.selected || square !== this.selected) {
+      const piece = this.chess.get(square);
+      if (piece && piece.color === this.chess.turn()) {
+        this.selectSquare(square, true);
         this.gestureFrom = square;
         this.gestureTarget = square;
         this.showHeldPiece();
+      } else if (this.selected) {
+        this.showToast("Pinch the selected piece to pick it up.");
       }
       return;
     }
+
     this.gestureFrom = this.selected;
-    this.gestureTarget = square || this.selected;
+    this.gestureTarget = this.selected;
     this.showHeldPiece();
   }
 
