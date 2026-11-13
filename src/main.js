@@ -3,6 +3,7 @@ import { GAMES, FILTERS, getGameById } from "./data/games.js";
 import { ArcadeScene } from "./core/ArcadeScene.js";
 import { GameManager } from "./core/GameManager.js";
 import { ChessGame } from "./games/chess/ChessGame.js";
+import { CarromGame } from "./games/carrom/CarromGame.js";
 
 const app = document.querySelector("#app");
 const PRIORITY_KEY = "gesturearcade:priority-games";
@@ -131,11 +132,11 @@ function renderDialog(game) {
           <ul>${game.buildNotes.map((note) => `<li>${icon("check")}${note}</li>`).join("")}</ul>
         </div>
         <div class="dialog-actions">
-          ${game.id === "chess" ? '<button class="button button--primary" type="button" data-play-game="chess">♟ Start Gesture Chess ↗</button>' : ""}
+          ${game.id === "chess" ? '<button class="button button--primary" type="button" data-play-game="chess">♟ Start Gesture Chess ↗</button>' : game.id === "carrom" ? '<button class="button button--primary" type="button" data-play-game="carrom">◉ Start Gesture Carrom ↗</button>' : ""}
           <button class="button button--secondary" type="button" data-toggle-priority="${game.id}">
             ${priority ? icon("check") + " Added to priorities" : icon("spark") + " Make this a priority"}
           </button>
-          <span class="dialog-footnote">${game.id === "chess" ? "Standard rules · Local two-player · Webcam optional" : "Gameplay module is in the build queue."}</span>
+          <span class="dialog-footnote">${game.id === "chess" ? "Standard rules · Local two-player · Webcam optional" : game.id === "carrom" ? "Carrom physics · Queen cover · Seven views · Webcam optional" : "Gameplay module is in the build queue."}</span>
         </div>
       </div>
     </div>`;
@@ -249,15 +250,16 @@ app.innerHTML = `
       <div class="build-copy">
         <div class="section-kicker"><span>03</span> IN THE WORKSHOP <i></i> PROJECT STATUS</div>
         <h2>The foundation<br />is <em>in motion.</em></h2>
-        <p>The arcade shell and shared input boundaries are in place. Gesture Chess is now the first playable module, with four more games joining the same interaction system next.</p>
+        <p>The arcade shell and shared input boundaries are in place. Gesture Chess and Gesture Carrom are playable, with three more games joining the same interaction system next.</p>
         <a class="button button--dark" href="https://github.com/Chethan-ULTIMAX/GestureArcade" target="_blank" rel="noreferrer">Follow the build on GitHub ${icon("arrowUpRight")}</a>
       </div>
       <div class="build-board">
-        <div class="build-board-top"><span>BUILD ROADMAP</span><span>PHASE 01 — 04</span></div>
+        <div class="build-board-top"><span>BUILD ROADMAP</span><span>PHASE 01 — 05</span></div>
         <div class="roadmap-item is-done"><span class="roadmap-check">${icon("check")}</span><div><strong>Arcade foundation</strong><small>Navigation, game registry, UI system</small></div><span class="roadmap-state">READY</span></div>
         <div class="roadmap-item is-done"><span class="roadmap-check">${icon("check")}</span><div><strong>Shared 3D + input boundaries</strong><small>Three.js stage, camera runtime contract</small></div><span class="roadmap-state">READY</span></div>
         <div class="roadmap-item is-done"><span class="roadmap-check">${icon("check")}</span><div><strong>Gesture Chess</strong><small>Standard rules, hand control, seven views</small></div><span class="roadmap-state">READY</span></div>
-        <div class="roadmap-item is-next"><span class="roadmap-check">04</span><div><strong>Four more game modules</strong><small>Carrom, air hockey, bowling and Jenga</small></div><span class="roadmap-state">NEXT</span></div>
+        <div class="roadmap-item is-done"><span class="roadmap-check">${icon("check")}</span><div><strong>Gesture Carrom</strong><small>Flick physics, queen cover, seven views</small></div><span class="roadmap-state">READY</span></div>
+        <div class="roadmap-item is-next"><span class="roadmap-check">05</span><div><strong>Three more game modules</strong><small>Air Hockey, Bowling and Jenga</small></div><span class="roadmap-state">NEXT</span></div>
         <div class="build-board-foot"><span class="status-pulse"></span> FOUNDATION BRANCH / MAIN</div>
       </div>
     </section>
@@ -278,6 +280,7 @@ gameHost.id = "game-host";
 document.body.appendChild(gameHost);
 const gameManager = new GameManager();
 gameManager.register("chess", new ChessGame());
+gameManager.register("carrom", new CarromGame());
 renderGrid();
 
 const dialog = document.querySelector("#game-dialog");
@@ -327,7 +330,7 @@ dialog.addEventListener("click", (event) => {
     dialog.close();
     gameManager.launch(gameId, gameHost).catch((error) => {
       console.error("Could not launch " + gameId + ":", error);
-      window.alert("The chess game could not start. Check the browser console for details.");
+      window.alert("The game could not start. Check the browser console for details.");
     });
     return;
   }

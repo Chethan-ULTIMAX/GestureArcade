@@ -1,0 +1,238 @@
+#game-host:has(.ga-carrom) { position: relative; z-index: 50; }
+.ga-carrom {
+  --car-bg: #090d0e;
+  --car-panel: #121b1b;
+  --car-panel-soft: #172221;
+  --car-line: rgba(219,239,221,.12);
+  --car-muted: #82968c;
+  --car-text: #eef4e8;
+  --car-lime: #d9ff7b;
+  --car-mint: #83e9b8;
+  --car-red: #ed655c;
+  position: fixed; inset: 0; z-index: 1000; overflow: auto;
+  color: var(--car-text); background:
+    radial-gradient(ellipse at 13% 20%, rgba(84, 112, 62, .17), transparent 34%),
+    radial-gradient(ellipse at 89% 78%, rgba(143, 81, 42, .13), transparent 36%),
+    linear-gradient(145deg, #090d0e 0%, #101615 52%, #0a1110 100%);
+  font-family: "Manrope", "Segoe UI", sans-serif;
+}
+.ga-carrom * { box-sizing: border-box; }
+.ga-carrom button { font: inherit; color: inherit; cursor: pointer; }
+.ga-carrom button:focus-visible { outline: 2px solid var(--car-lime); outline-offset: 3px; }
+.ga-carrom-topbar {
+  position: sticky; top: 0; z-index: 20; min-height: 68px; padding: 0 3.3vw;
+  display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; gap: 18px;
+  background: rgba(7,12,12,.9); border-bottom: 1px solid var(--car-line); backdrop-filter: blur(18px);
+}
+.ga-carrom-back, .ga-carrom-icon-btn, .ga-carrom-reset {
+  display: inline-flex; align-items: center; justify-content: center; gap: 9px;
+  border: 1px solid var(--car-line); border-radius: 8px; padding: 10px 13px;
+  background: rgba(255,255,255,.035); color: #cfdbd0; font-size: 10px; font-weight: 800; letter-spacing: .12em;
+  transition: .2s ease;
+}
+.ga-carrom-back:hover, .ga-carrom-icon-btn:hover, .ga-carrom-reset:hover { border-color: rgba(217,255,123,.55); color: var(--car-lime); }
+.ga-carrom-back svg, .ga-carrom-icon-btn svg, .ga-carrom-reset svg { width: 16px; height: 16px; }
+.ga-carrom-brand { display: flex; align-items: center; gap: 11px; }
+.ga-carrom-mark {
+  width: 34px; height: 34px; display: grid; place-items: center; border-radius: 10px;
+  background: linear-gradient(145deg, #edc28d, #b77c45); color: #29170d;
+  font: 800 18px "Space Grotesk", sans-serif; box-shadow: 0 0 24px rgba(213,161,99,.17);
+}
+.ga-carrom-brand strong { display: block; font: 700 13px "Space Grotesk", sans-serif; letter-spacing: .08em; }
+.ga-carrom-brand strong span { color: #e7ba7c; }
+.ga-carrom-brand small { display: block; margin-top: 2px; color: var(--car-muted); font: 8px "DM Mono", monospace; letter-spacing: .17em; }
+.ga-carrom-actions { display: flex; justify-content: flex-end; align-items: center; gap: 9px; }
+.ga-carrom-live { display: inline-flex; align-items: center; gap: 7px; margin-right: 8px; color: #a9bbb0; font: 9px "DM Mono", monospace; letter-spacing: .12em; }
+.ga-carrom-live i, .ga-carrom-camera-head i, .ga-carrom-privacy i { width: 7px; height: 7px; display: inline-block; border-radius: 50%; background: #8de8a3; box-shadow: 0 0 11px #8de8a3; }
+.ga-carrom-reset { border-color: rgba(217,255,123,.25); background: rgba(217,255,123,.09); color: var(--car-lime); }
+.ga-carrom-icon-btn:disabled { opacity: .35; cursor: not-allowed; }
+.ga-carrom-layout {
+  width: min(1620px, 97vw); min-height: calc(100svh - 69px); margin: 0 auto;
+  padding: 20px 1.4vw 35px; display: grid; grid-template-columns: minmax(0, 1.58fr) minmax(290px, .68fr);
+  align-items: start; gap: clamp(20px, 2.7vw, 42px);
+}
+.ga-carrom-main { min-width: 0; }
+.ga-carrom-player {
+  width: min(760px, 96%); min-height: 48px; margin: 0 auto; padding: 6px 14px;
+  display: flex; align-items: center; gap: 11px; border: 1px solid transparent; border-radius: 9px; transition: .2s ease;
+}
+.ga-carrom-player.is-active { border-color: rgba(217,255,123,.28); background: rgba(217,255,123,.05); box-shadow: 0 0 26px rgba(217,255,123,.04); }
+.ga-carrom-player-token { width: 25px; height: 25px; flex: 0 0 auto; display: block; border-radius: 50%; box-shadow: inset 0 2px 4px rgba(255,255,255,.6), inset 0 -3px 5px rgba(0,0,0,.25), 0 3px 5px rgba(0,0,0,.28); }
+.token-white { background: radial-gradient(circle at 32% 25%, #fffef0 0, #e4ddc7 56%, #a89c80 100%); border: 1px solid #9d9178; }
+.token-black { background: radial-gradient(circle at 32% 25%, #697a70 0, #293831 52%, #070e0b 100%); border: 1px solid #46594b; }
+.ga-carrom-player div strong { display: block; font: 800 10px "DM Mono", monospace; letter-spacing: .16em; }
+.ga-carrom-player div small { display: block; margin-top: 3px; color: var(--car-muted); font: 8px "DM Mono", monospace; letter-spacing: .08em; }
+.ga-carrom-player > b { margin-left: auto; color: #738b7c; font: 8px "DM Mono", monospace; letter-spacing: .13em; }
+.ga-carrom-player.is-active > b { color: var(--car-lime); }
+.ga-carrom-stage {
+  position: relative; isolation: isolate; width: min(100%, 760px); aspect-ratio: 1; margin: 0 auto; overflow: visible;
+  border: 1px solid rgba(225,195,148,.15); border-radius: 18px;
+  background:
+    radial-gradient(ellipse at 50% 45%, rgba(201,159,104,.1), transparent 58%),
+    linear-gradient(145deg, rgba(60,77,56,.27), rgba(16,25,22,.4));
+  box-shadow: inset 0 1px rgba(255,255,255,.025), 0 24px 65px rgba(0,0,0,.28);
+}
+.ga-carrom-board-glow {
+  position: absolute; z-index: -1; inset: 11%; border-radius: 50%;
+  background: rgba(215,171,112,.11); filter: blur(37px); pointer-events: none;
+}
+.ga-carrom-stage > canvas#carrom-board {
+  position: absolute; inset: 0; width: 100%; height: 100%; display: block;
+  border-radius: 15px; cursor: crosshair; touch-action: none; outline: none;
+}
+.ga-carrom-cursor {
+  position: fixed; z-index: 1010; top: 0; left: 0; width: 22px; height: 22px; display: none;
+  place-items: center; border: 2px solid #ecff8d; border-radius: 50%; background: rgba(194,255,123,.25);
+  box-shadow: 0 0 0 7px rgba(194,255,123,.12), 0 0 24px rgba(194,255,123,.78);
+  pointer-events: none; transform: translate(-50%,-50%); transition: left .035s linear, top .035s linear, width .1s ease, height .1s ease;
+}
+.ga-carrom-cursor.is-visible { display: grid; }
+.ga-carrom-cursor.is-pinching { width: 35px; height: 35px; border-color: #fff; background: rgba(238,255,143,.5); box-shadow: 0 0 0 8px rgba(255,255,125,.17), 0 0 30px #eaff7c; }
+.ga-carrom-cursor span { position: absolute; top: 29px; left: 50%; transform: translateX(-50%); color: #f1ffbc; font: 8px "DM Mono", monospace; opacity: 0; text-shadow: 0 1px 5px #000; }
+.ga-carrom-cursor.is-pinching span { opacity: 1; top: 39px; }
+.ga-carrom-camera {
+  position: absolute; z-index: 8; top: 15px; right: 15px; width: clamp(155px, 21vw, 220px);
+  border: 1px solid rgba(154,235,194,.24); border-radius: 10px; overflow: hidden;
+  background: rgba(5,11,10,.91); box-shadow: 0 13px 34px rgba(0,0,0,.4); backdrop-filter: blur(14px);
+  transition: width .25s ease, opacity .25s ease;
+}
+.ga-carrom-camera-head, .ga-carrom-camera-foot { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 7px 9px; }
+.ga-carrom-camera-head { border-bottom: 1px solid rgba(200,238,220,.09); color: #a8c0b4; font: 8px "DM Mono", monospace; letter-spacing: .1em; }
+.ga-carrom-camera-head span { display: inline-flex; align-items: center; gap: 7px; }
+.ga-carrom-camera-head i { width: 6px; height: 6px; background: #64736c; box-shadow: none; }
+.ga-carrom-camera.is-live .ga-carrom-camera-head i { background: #8de8a3; box-shadow: 0 0 9px #8de8a3; }
+.ga-carrom-camera-head button { width: 20px; height: 20px; border: 0; border-radius: 4px; background: rgba(255,255,255,.07); color: #cad8ce; font-size: 17px; line-height: 1; }
+.ga-carrom-camera-screen { position: relative; aspect-ratio: 4/3; overflow: hidden; background: #080e0c; }
+.ga-carrom-camera-screen video, .ga-carrom-camera-screen canvas { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+.ga-carrom-camera-screen video { opacity: 0; transform: scaleX(-1); transition: opacity .2s ease; }
+.ga-carrom-camera.is-live .ga-carrom-camera-screen video { opacity: .93; }
+.ga-carrom-camera-screen canvas { z-index: 2; pointer-events: none; }
+.ga-carrom-camera-screen em { position: absolute; z-index: 4; bottom: 6px; right: 8px; color: #deff9b; font: normal 7px "DM Mono", monospace; text-shadow: 0 1px 4px #000; }
+.ga-carrom-camera-placeholder { position: absolute; inset: 0; z-index: 3; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; color: #8ba398; background: radial-gradient(circle, rgba(90,136,113,.13), transparent 60%); text-align: center; }
+.ga-carrom-camera-placeholder[hidden] { display: none; }
+.ga-carrom-camera-placeholder > span { width: 33px; height: 33px; display: grid; place-items: center; border: 1px solid rgba(169,233,185,.23); border-radius: 9px; color: var(--car-mint); }
+.ga-carrom-camera-placeholder svg { width: 18px; height: 18px; }
+.ga-carrom-camera-placeholder strong { font: 700 8px "DM Mono", monospace; letter-spacing: .14em; }
+.ga-carrom-camera-placeholder small { max-width: 85%; color: #6b8579; font-size: 9px; }
+.ga-carrom-camera-foot { background: rgba(10,20,17,.92); color: #8ca69a; font: 7px "DM Mono", monospace; letter-spacing: .1em; }
+.ga-carrom-camera-foot button { padding: 6px 9px; border: 1px solid rgba(217,255,123,.3); border-radius: 5px; color: var(--car-lime); background: rgba(217,255,123,.09); font: 800 8px "DM Mono", monospace; letter-spacing: .1em; }
+.ga-carrom-camera-foot button:disabled { opacity: .5; cursor: wait; }
+.ga-carrom-camera.is-minimized { width: 158px; }
+.ga-carrom-camera.is-minimized .ga-carrom-camera-screen, .ga-carrom-camera.is-minimized .ga-carrom-camera-foot { display: none; }
+.ga-carrom-overlay { position: absolute; z-index: 12; inset: 0; display: grid; place-items: center; border-radius: 17px; background: rgba(5,11,10,.67); backdrop-filter: blur(8px); }
+.ga-carrom-overlay[hidden] { display: none !important; }
+.ga-carrom-result-card {
+  width: min(330px, 88%); padding: 25px; border: 1px solid rgba(217,255,123,.27); border-radius: 15px;
+  background: linear-gradient(150deg, #24332a, #111d18); box-shadow: 0 24px 65px rgba(0,0,0,.5); text-align: center;
+}
+.ga-carrom-result-star { display: block; margin-bottom: 7px; color: var(--car-lime); font-size: 30px; }
+.ga-carrom-result-card small { color: #b7d794; font: 8px "DM Mono", monospace; letter-spacing: .16em; }
+.ga-carrom-result-card h2 { margin: 8px 0; font: 800 25px "Space Grotesk", sans-serif; }
+.ga-carrom-result-card p { color: #a7b9a9; font-size: 10px; line-height: 1.65; }
+.ga-carrom-result-card button { margin-top: 9px; padding: 11px 17px; border: 0; border-radius: 6px; background: var(--car-lime); color: #162018; font: 800 9px "DM Mono", monospace; letter-spacing: .1em; }
+.ga-carrom-aim-hint {
+  width: min(740px, 96%); margin: 11px auto 13px; padding: 12px 13px; display: flex; align-items: center; gap: 10px;
+  border: 1px solid var(--car-line); border-radius: 9px; background: rgba(255,255,255,.027);
+}
+.ga-carrom-hint-dot { width: 8px; height: 8px; flex: 0 0 auto; border-radius: 50%; background: var(--car-mint); box-shadow: 0 0 12px var(--car-mint); }
+.ga-carrom-aim-hint strong { display: block; color: #e2eadb; font: 700 8px "DM Mono", monospace; letter-spacing: .08em; }
+.ga-carrom-aim-hint small { display: block; margin-top: 4px; color: #82968b; font-size: 9px; line-height: 1.45; }
+.ga-carrom-hint-badge { margin-left: auto; flex: 0 0 auto; color: #b7ce96; font: 8px "DM Mono", monospace; letter-spacing: .06em; }
+.ga-carrom-view-panel { width: min(740px, 96%); margin: 12px auto 14px; }
+.ga-carrom-view-title { display: flex; justify-content: space-between; align-items: center; margin: 0 2px 8px; color: #b6c5b6; font: 9px "DM Mono", monospace; letter-spacing: .13em; }
+.ga-carrom-view-title small { color: #768a7d; font-size: 8px; }
+.ga-carrom-view-list { display: flex; flex-wrap: wrap; gap: 6px; }
+.ga-carrom-view-btn { flex: 1 1 auto; min-height: 33px; padding: 7px 10px; border: 1px solid var(--car-line); border-radius: 6px; background: rgba(255,255,255,.028); color: #9aab9f !important; font: 700 8px "DM Mono", monospace !important; letter-spacing: .04em; text-transform: uppercase; transition: .18s ease; }
+.ga-carrom-view-btn:hover { border-color: rgba(217,255,123,.38); color: #e8f5d4 !important; }
+.ga-carrom-view-btn.is-active { color: #1b2418 !important; border-color: var(--car-lime); background: var(--car-lime); box-shadow: 0 0 18px rgba(217,255,123,.14); }
+.ga-carrom-side { display: flex; flex-direction: column; gap: 12px; min-width: 0; }
+.ga-carrom-turn-card, .ga-carrom-side-card { border: 1px solid var(--car-line); border-radius: 12px; background: linear-gradient(145deg, rgba(24,38,34,.96), rgba(14,25,22,.97)); box-shadow: 0 12px 35px rgba(0,0,0,.14); }
+.ga-carrom-turn-card { position: relative; overflow: hidden; padding: 16px 17px 14px; }
+.ga-carrom-turn-card::after { content: ""; position: absolute; top: -56px; right: -56px; width: 150px; height: 150px; border-radius: 50%; background: rgba(217,255,123,.055); filter: blur(3px); pointer-events: none; }
+.ga-carrom-turn-card.is-black-turn::after { background: rgba(166,195,181,.08); }
+.ga-carrom-card-head { display: flex; justify-content: space-between; color: #91a69a; font: 8px "DM Mono", monospace; letter-spacing: .14em; }
+.ga-carrom-card-head b { color: #d0e1b2; font-weight: 500; }
+.ga-carrom-turn-main { display: flex; align-items: center; gap: 12px; margin-top: 14px; }
+.ga-carrom-turn-coin { width: 44px; height: 44px; display: grid; place-items: center; border-radius: 11px; box-shadow: inset 0 2px 4px rgba(255,255,255,.55), inset 0 -3px 5px rgba(0,0,0,.22); }
+.ga-carrom-turn-main small { display: block; color: #9bb195; font: 8px "DM Mono", monospace; letter-spacing: .14em; }
+.ga-carrom-turn-main h2 { margin: 4px 0 0; font: 700 21px "Space Grotesk", sans-serif; letter-spacing: -.04em; }
+.ga-carrom-turn-card p { margin: 11px 0 13px; color: #9caf9f; font-size: 10px; line-height: 1.6; }
+.ga-carrom-meter { height: 3px; overflow: hidden; border-radius: 3px; background: rgba(255,255,255,.09); }
+.ga-carrom-meter span { display: block; height: 100%; background: linear-gradient(90deg, #8bd99b, var(--car-lime)); transition: width .2s ease; }
+.ga-carrom-scores { display: flex; align-items: center; gap: 10px; padding-top: 13px; }
+.ga-carrom-scores > div:first-child, .ga-carrom-scores > div:nth-child(3) { display: flex; flex-direction: column; gap: 2px; }
+.ga-carrom-scores small { color: #82958a; font: 7px "DM Mono", monospace; letter-spacing: .13em; }
+.ga-carrom-scores strong { color: #f1f4e7; font: 700 20px "Space Grotesk", sans-serif; }
+.ga-carrom-score-divider { height: 30px; border-left: 1px solid var(--car-line); }
+.ga-carrom-score-target { margin-left: auto; color: #a9bd8b; font: 8px "DM Mono", monospace; letter-spacing: .08em; }
+.ga-carrom-side-card { padding: 14px 15px; }
+.ga-carrom-side-head { display: flex; justify-content: space-between; align-items: center; gap: 10px; margin-bottom: 11px; }
+.ga-carrom-side-head > div > span { display: block; color: #8ba396; font: 8px "DM Mono", monospace; letter-spacing: .15em; }
+.ga-carrom-side-head h3 { margin: 4px 0 0; color: #eff5e9; font: 700 15px "Space Grotesk", sans-serif; }
+.ga-carrom-count { min-width: 31px; padding: 5px 7px; text-align: center; border: 1px solid var(--car-line); border-radius: 5px; color: var(--car-lime); font: 9px "DM Mono", monospace; }
+.ga-carrom-piece-count { display: grid; grid-template-columns: 1fr auto 1fr auto; align-items: center; gap: 8px; padding: 10px 0; border-top: 1px solid rgba(219,239,221,.06); border-bottom: 1px solid rgba(219,239,221,.06); }
+.ga-piece-key { display: inline-flex; align-items: center; gap: 7px; color: #aab9ac; font-size: 9px; }
+.ga-piece-key i, .key-queen { width: 13px; height: 13px; display: inline-block; border-radius: 50%; box-shadow: inset 0 1px 2px rgba(255,255,255,.55), 0 2px 4px rgba(0,0,0,.35); }
+.key-white { background: linear-gradient(145deg,#fffef0,#b9ac8f); }
+.key-black { background: linear-gradient(145deg,#6b796f,#111c16); }
+.key-queen { background: linear-gradient(145deg,#ffaaa0,#ae2829); }
+.ga-carrom-piece-count > strong { color: #eff4e9; font: 700 15px "Space Grotesk"; }
+.ga-carrom-queen-status { display: flex; align-items: center; gap: 8px; margin-top: 10px; color: #c2a4a0; font-size: 9px; }
+.ga-carrom-shot-log { display: flex; flex-direction: column; gap: 6px; max-height: 150px; overflow: auto; scrollbar-width: thin; scrollbar-color: #46594d transparent; }
+.ga-carrom-shot-entry { display: grid; grid-template-columns: 48px 1fr; gap: 8px; align-items: start; padding: 7px 8px; border-radius: 5px; background: rgba(255,255,255,.022); }
+.ga-carrom-shot-entry span { color: #d5e5b8; font: 8px "DM Mono", monospace; letter-spacing: .07em; }
+.ga-carrom-shot-entry strong { color: #9bada0; font: 8px "DM Mono", monospace; line-height: 1.45; font-weight: 500; }
+.ga-carrom-empty { padding: 13px 5px; color: #758b7e; font: 9px "DM Mono", monospace; text-align: center; }
+.ga-carrom-input-status { padding: 4px 6px; border: 1px solid rgba(217,255,123,.18); border-radius: 4px; color: #a6cd8c; font: 7px "DM Mono", monospace; }
+.ga-carrom-control-row { display: flex; align-items: center; gap: 10px; padding: 7px 0; border-top: 1px solid rgba(219,239,221,.055); }
+.ga-control-symbol { width: 28px; height: 28px; flex: 0 0 auto; display: grid; place-items: center; border-radius: 7px; color: var(--car-lime); background: rgba(217,255,123,.08); font-size: 15px; }
+.ga-carrom-control-row strong { display: block; color: #dce8d9; font-size: 10px; }
+.ga-carrom-control-row small { display: block; margin-top: 2px; color: #859b8e; font-size: 9px; }
+.ga-carrom-privacy { display: inline-flex; align-items: center; gap: 7px; padding: 5px 3px; color: #6c8176; font: 7px "DM Mono", monospace; letter-spacing: .1em; }
+.ga-carrom-privacy i { width: 5px; height: 5px; }
+.ga-carrom-toast {
+  position: fixed; left: 50%; bottom: 22px; z-index: 1020; max-width: min(90vw, 460px); padding: 11px 16px;
+  border: 1px solid rgba(217,255,123,.26); border-radius: 8px; background: rgba(10,19,15,.95);
+  color: #e7f2dc; font: 10px "DM Mono", monospace; text-align: center; opacity: 0; pointer-events: none;
+  transform: translate(-50%,12px); transition: .22s ease; box-shadow: 0 12px 30px rgba(0,0,0,.34);
+}
+.ga-carrom-toast.is-visible { opacity: 1; transform: translate(-50%,0); }
+@media (max-width: 1150px) {
+  .ga-carrom-layout { grid-template-columns: minmax(0,1fr) 285px; gap: 17px; width: 99vw; padding-inline: .8vw; }
+}
+@media (max-width: 860px) {
+  .ga-carrom-topbar { padding: 0 13px; grid-template-columns: auto 1fr auto; }
+  .ga-carrom-brand { justify-self: center; }
+  .ga-carrom-brand small, .ga-carrom-live, .ga-carrom-icon-btn span, .ga-carrom-reset span { display: none; }
+  .ga-carrom-actions { gap: 5px; }
+  .ga-carrom-back, .ga-carrom-icon-btn, .ga-carrom-reset { padding: 9px; }
+  .ga-carrom-layout { display: flex; flex-direction: column; width: min(800px,100%); padding: 13px 10px 30px; gap: 16px; }
+  .ga-carrom-main, .ga-carrom-side { width: 100%; }
+  .ga-carrom-stage { width: min(100%,720px); }
+  .ga-carrom-side { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); align-items: start; }
+  .ga-carrom-turn-card, .ga-carrom-control-card, .ga-carrom-privacy { grid-column: span 2; }
+  .ga-carrom-camera { top: 10px; right: 10px; width: clamp(135px,25vw,205px); }
+}
+@media (max-width: 520px) {
+  .ga-carrom-mark { width: 30px; height: 30px; }
+  .ga-carrom-brand strong { font-size: 11px; }
+  .ga-carrom-back span { display: none; }
+  .ga-carrom-layout { padding: 7px 7px 25px; }
+  .ga-carrom-stage { width: 100%; border-radius: 11px; }
+  .ga-carrom-stage > canvas#carrom-board { border-radius: 10px; }
+  .ga-carrom-camera { top: 6px; right: 6px; width: 112px; border-radius: 7px; }
+  .ga-carrom-camera-head { padding: 5px 6px; font-size: 6px; }
+  .ga-carrom-camera-foot { padding: 5px 6px; font-size: 6px; }
+  .ga-carrom-camera-foot button { padding: 5px 6px; font-size: 7px; }
+  .ga-carrom-camera-placeholder small { display: none; }
+  .ga-carrom-camera-placeholder > span { width: 26px; height: 26px; }
+  .ga-carrom-view-list { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); }
+  .ga-carrom-view-btn { min-width: 0; padding-inline: 5px; font-size: 7px !important; }
+  .ga-carrom-aim-hint { align-items: flex-start; padding: 10px; }
+  .ga-carrom-hint-badge { display: none; }
+  .ga-carrom-side { grid-template-columns: 1fr; }
+  .ga-carrom-turn-card, .ga-carrom-control-card, .ga-carrom-privacy { grid-column: auto; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .ga-carrom *, .ga-carrom *::before, .ga-carrom *::after { scroll-behavior: auto !important; transition-duration: .01ms !important; animation-duration: .01ms !important; }
+}

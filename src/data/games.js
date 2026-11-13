@@ -30,7 +30,7 @@ export const GAMES = [
     number: "02",
     name: "Carrom",
     tagline: "Line it up. Flick it. Pocket it.",
-    description: "Bring the tabletop favourite into 3D. Aim with a steady hand, set your power, and flick the striker into the coins.",
+    description: "A full local two-player carrom board with responsive striker physics, four corner pockets, queen cover rules, fouls, match scoring and seven fixed camera views. Aim, pull back and flick with your hand.",
     category: "tabletop",
     categoryLabel: "TABLETOP",
     players: "1–2 PLAYERS",
@@ -39,14 +39,16 @@ export const GAMES = [
     badge: "PRECISION",
     interaction: "Aim & flick",
     controls: [
-      { gesture: "Point", action: "Aim the striker direction" },
-      { gesture: "Pull back", action: "Set shot power" },
-      { gesture: "Quick release", action: "Flick the striker" }
+      { gesture: "Point", action: "Position the striker along your baseline" },
+      { gesture: "Pinch & hold", action: "Grab the striker to begin a shot" },
+      { gesture: "Pull back", action: "Aim opposite the target and set power" },
+      { gesture: "Release", action: "Flick the striker into the coins" }
     ],
     buildNotes: [
-      "Top-down 3D board and collision boundaries",
-      "Striker force, friction and coin collisions",
-      "Pocket detection, fouls and turn rules"
+      "Responsive striker, carromman and rail collision physics",
+      "Four corner pockets, queen cover and striker-foul handling",
+      "Two-player turns, board scoring, match to 25 and eight-board limit",
+      "Seven fixed camera views and smooth pinch-pull-release controls"
     ],
     art: "carrom"
   },

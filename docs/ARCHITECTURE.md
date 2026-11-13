@@ -4,157 +4,77 @@
 
 GestureArcade is the gesture-controlled gaming arena. It owns the game-selection experience, shared 3D runtime, webcam/hand-landmark input, common gesture vocabulary, and game lifecycle. It is independent from the Engineering Lab and Spatial Interaction Lab projects.
 
-The landing page is a real working shell. Gesture Chess is the first registered playable module: local two-player standard chess rules, 2.5D presentation, seven fixed camera views, and optional MediaPipe pinch controls. Carrom, Air Hockey, Bowling and Jenga remain previews until their own modules are implemented and tested.
+The landing page is a real working shell. Gesture Chess and Gesture Carrom are registered playable modules. Air Hockey, Bowling and Jenga remain previews until their own modules are implemented and tested.
 
 ## Current stack
 
 - Vite + vanilla JavaScript (ES modules)
-- Three.js for 3D scenes and rendering
-- MediaPipe Tasks Vision for hand landmarks
+- Three.js for the landing-page 3D scene
+- MediaPipe Tasks Vision for shared hand landmarks
 - chess.js for standard chess rules and legal-move validation
+- Canvas 2D for the 2.5D carrom board and disc rendering
 - Browser MediaDevices API for explicit webcam access
-- No framework, backend, account system, paid API, or server-side dependency
+- No framework, backend, account system, paid API or server-side dependency
 
 ## Runtime layers
 
-```text
-src/
-  core/
-    ArcadeScene.js       Landing-page ambient Three.js scene
-    GameManager.js       Game registration, launch and disposal lifecycle
-  data/
-    games.js             Single source of truth for game metadata
-  vision/
-    GestureInput.js      Camera lifecycle + MediaPipe hand landmarks
-  input/                 Future: gesture recognition and game action mapping
-  games/
-    chess/
-    carrom/
-    air-hockey/
-    bowling/
-    jenga/
-  shared/
-    physics/
-    objects/
-    utilities/
-  ui/
-    GameCard.js          Future extraction from the arcade shell
-    GameDialog.js        Future extraction from the arcade shell
-```
+    src/
+      core/
+        ArcadeScene.js
+        GameManager.js
+      data/
+        games.js
+      vision/
+        GestureInput.js
+      games/
+        chess/
+          ChessGame.js
+          chess.css
+          chess-rules.test.js
+        carrom/
+          CarromGame.js
+          CarromPhysics.js
+          carrom.css
+          carrom-physics.test.js
+        air-hockey/
+        bowling/
+        jenga/
+      main.js
+      style.css
 
-The folders under `games/`, `input/`, `shared/`, and `ui/` are extension points. Create them when the first relevant modules are added; do not add empty placeholder files solely to make the tree look complete.
+## Game lifecycle
 
-## Core contracts
+Every game registered with GameManager exposes mount({ root, gameId, input, options, onExit }) and dispose(). A module owns its gameplay state and listeners. The active module must stop the camera, animation frames, observers, listeners and any owned resources when disposed.
 
-### Game registry — `src/data/games.js`
+## Shared camera and hand input
 
-`GAMES` is the canonical metadata list used by the landing page and game selector. IDs are stable kebab-case identifiers:
-
-- `chess`
-- `carrom`
-- `air-hockey`
-- `bowling`
-- `jenga`
-
-Keep game display metadata out of the game implementations. Add a game to this list only when the product owner approves it.
-
-### Game lifecycle — `src/core/GameManager.js`
-
-A game implementation registered with `GameManager` must provide:
-
-```js
-const gameModule = {
-  async mount({ root, gameId, input, options, onExit }) {
-    // Build the game scene, subscribe to input and start the game loop.
-  },
-  async dispose() {
-    // Stop animation loops, remove listeners, dispose Three.js resources.
-  }
-};
-```
-
-Register one implementation per stable game ID. `launch()` stops the previous game before mounting the next. A failed mount emits `gameerror` and clears the mount root. `stop()` is idempotent.
-
-### Camera and landmarks — `src/vision/GestureInput.js`
-
-The service is deliberately game-agnostic. It owns:
+GestureInput owns:
 
 1. Explicit camera permission and MediaStream lifecycle.
-2. MediaPipe Tasks Vision initialization (GPU, then CPU fallback).
+2. MediaPipe Tasks Vision initialization (GPU with CPU fallback).
 3. A video-frame-driven detection loop.
-4. Landmark callbacks and service lifecycle events.
-5. Complete cleanup of tracks, animation frames and model resources.
+4. Landmark callbacks and lifecycle events.
+5. Cleanup of camera tracks, animation frames and model resources.
 
-Only request camera access after a clear user action. Do not start the camera on page load. Do not store or upload camera frames. Each game must be able to stop and release camera usage when leaving its session.
+Camera access begins only after a clear user action. The game must not start the camera on page load. No camera frames are stored or uploaded.
 
-### Future gesture pipeline
+## Gesture Chess
 
-Keep recognition separate from game-specific behavior:
+The chess module uses chess.js as its only rules authority. It supports standard legal move validation, check, checkmate, stalemate, castling, en passant, promotion, history, undo, PGN and draw states. It uses the seven fixed camera views documented in CHESS-GESTURE-CONTROLS.md.
 
-```text
-Webcam video
-  -> GestureInput (MediaPipe landmarks)
-  -> HandLandmarks (normalize, smooth, handedness)
-  -> GestureRecognizer (pinch, open palm, point, flick, grab)
-  -> GestureMapper (semantic action + normalized coordinates)
-  -> Active game controller
-  -> Game state / physics / visual feedback
-```
+## Gesture Carrom
 
-A gesture event should be semantic, not a raw MediaPipe object. Suggested shape:
+The Carrom module uses a dedicated deterministic board-space physics layer and the same seven fixed camera views as Chess. It offers striker positioning, pinch/pull/release aiming, disc collisions, rails, pockets, a core singles queen-cover flow, striker due handling, board scores and local two-player turns.
 
-```js
-{
-  type: "pinch-start",       // pinch-start | pinch-move | pinch-end | palm-move | flick
-  hand: "left",              // left | right
-  position: { x: 0.52, y: 0.41, z: 0.08 }, // normalized 0..1 x/y
-  velocity: { x: 0.02, y: -0.01 },
-  confidence: 0.91,
-  timestamp: 123456.7
-}
-```
+Physics and rules are kept separate from the DOM and webcam layer where practical. CarromPhysics owns the board bodies, collision stepping, pocket detection and settle checks. CarromGame maps mouse/touch or hand landmarks into striker placement and shot actions, then resolves the returned pocket events into turn and match state.
 
-Use hysteresis for pinch start/end thresholds, smooth position without introducing obvious latency, and avoid dispatching duplicate semantic events every frame. Keep raw landmarks available for advanced game-specific interactions, but do not make every game reimplement hand tracking.
+See CARROM-GESTURE-CONTROLS.md for the interaction contract and explicit rule scope. The implementation is an exhibition-ready core singles variant, not a complete tournament referee for every rare penalty and doubles edge case.
 
-## Initial game interaction proposals
+## Future modules
 
-| Game | Primary interaction | Supporting actions |
-|---|---|---|
-| Chess | Pinch to pick up and place a piece | Hover highlight, cancel, snap to legal square |
-| Carrom | Point to aim, pull back and release to shoot | Power preview, striker reposition |
-| Air Hockey | Open palm controls a paddle | Fast movement, defensive positioning |
-| Bowling | Grip, aim and swing to release | Direction adjustment, power feedback |
-| Jenga | Pinch and slide a block | Hover/select, release, tower stability feedback |
+Carrom and Chess establish two reusable interaction patterns:
 
-Use the same camera and gesture runtime. The mapper may expose game-specific sensitivity profiles, but should not duplicate camera/model lifecycle logic.
+- Pick-up/place for discrete pieces and rule-validated board movement
+- Aim/pull/release for physical objects and impulse-driven tabletop play
 
-## Visual and performance principles
-
-- Use one shared renderer/scene utility where it makes sense, but each game owns its gameplay scene and must dispose its resources.
-- Prefer low-poly/custom procedural objects for the first playable version; avoid large paid asset dependencies.
-- Cap device pixel ratio and handle resize.
-- Use `requestAnimationFrame` and avoid allocating large objects in each frame.
-- Smooth landmarks in the interaction layer; do not stack heavy smoothing in every game.
-- Keep the landing page usable when WebGL is unavailable.
-- Respect `prefers-reduced-motion` and provide keyboard/mouse alternatives where practical.
-- Camera access must be opt-in and visible to the user.
-
-## Suggested implementation order
-
-1. Implement shared landmark utilities and semantic gesture recognition; test pinch and palm tracking in a dedicated calibration view.
-2. Build one polished vertical slice (recommended: Carrom or Chess) through scene, input, interaction, rules and reset.
-3. Validate camera latency, lighting tolerance, hand-loss recovery and performance on ordinary laptop hardware.
-4. Extract reusable 3D board/object helpers and game HUD patterns.
-5. Implement the remaining games using the same input runtime.
-6. Add settings, calibration, accessibility options and a full cross-game performance pass.
-
-## Local development
-
-```bash
-npm install
-npm run dev
-npm run build
-npm run preview
-```
-
-Camera permissions work on localhost and HTTPS origins. Production hosting must use HTTPS.
+Air Hockey, Bowling and Jenga should reuse GestureInput and GameManager, but keep their game-specific controls and physics independent.

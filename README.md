@@ -7,12 +7,12 @@
 | Game | Status | Main interaction |
 |---|---|---|
 | Chess | **Playable** | Pinch, pick up, move and release |
-| Carrom | Planned | Aim and flick |
+| Carrom | **Playable** | Position, pinch, pull back and flick |
 | Air Hockey | Planned | Palm-tracked paddle |
 | Bowling | Planned | Swing and release |
 | Jenga | Planned | Pinch and slide |
 
-The arcade shell and shared runtime are in place. Chess is the first complete game module; the other game cards remain previews until their modules are implemented.
+The arcade shell and shared camera/hand-landmark runtime are in place. Chess and Carrom are playable local two-player modules; the other game cards remain previews.
 
 ## Gesture Chess
 
@@ -28,37 +28,37 @@ Gesture Chess is a local two-player chess match with a perspective board and sev
 
 The board uses a 2.5D presentation: raised piece styling, layered shadows and a perspective board plane. It is not a free-orbit 3D scene.
 
-### Standard chess rules
+The chess.js rules engine validates every move and supports check, checkmate, stalemate, castling, en passant, four-way promotion, undo, PGN and draw detection. See [Chess gesture controls](docs/CHESS-GESTURE-CONTROLS.md).
 
-The rules engine is chess.js 1.4.x. The game accepts only legal moves and supports:
+## Gesture Carrom
 
-- Check, checkmate and stalemate
-- Castling on either side when the rules permit it
-- En passant
-- Promotion to queen, rook, bishop or knight
-- Move history and PGN export
-- Undo and reset
-- Draw detection, including threefold repetition, insufficient material and the fifty-move rule
+Gesture Carrom is a local two-player singles match on a perspective wooden board. It includes:
 
-The game is local two-player (White and Black taking turns). It does not currently include a computer opponent or online multiplayer.
+- A full 19-piece opening rack: nine white, nine black and the red queen
+- Four corner pockets, cushioned rails and responsive disc collisions
+- Striker positioning, pull-back power, aim guide and flick release
+- Turn retention when your own carrommen are pocketed
+- Queen eligibility and immediate cover handling
+- Striker fouls, returned coins and outstanding due pieces
+- Shot log, undo, reset and captured-piece counts
+- Board points, alternating breaks, a first-to-25 match target and an eight-board limit
+- The same seven fixed camera views as Chess
 
 ### Hand controls
 
-Enable the camera from inside the chess game; it does not start automatically.
-
 | Gesture | Action |
 |---|---|
-| Point with index finger | Move the on-screen hand cursor |
-| Pinch thumb and index finger | Pick up the piece under the cursor |
-| Keep pinching and move | Carry the selected piece |
-| Release over a highlighted square | Place the piece if the move is legal |
-| Hold an open palm | Cancel the current selection |
+| Point along your baseline | Position the striker |
+| Pinch the striker | Begin a shot |
+| Keep pinching and pull away from the target | Set aim and power |
+| Release | Flick the striker |
+| Open palm | Cancel an aim before release |
 
-Legal empty destinations glow green. Capture destinations are marked red. The active turn controls which color of pieces can be selected, so after White moves, the next hand interaction is limited to Black's pieces.
+A mouse/touch fallback is available: move to the baseline, press on the striker, drag backwards and release. The camera is opt-in and uses the same MediaPipe runtime as Chess.
 
-The hand cursor is smoothed and pinch transitions use separate grab/release thresholds to reduce jitter and accidental drops. A mouse/touch click-to-select and click-to-move fallback is also available.
+The Carrom rules implement the core singles flow based on the published All India Carrom Federation laws. A few tournament-referee edge cases are intentionally simplified for a two-player exhibition game; see [Carrom gesture controls](docs/CARROM-GESTURE-CONTROLS.md).
 
-### Camera and privacy
+## Camera and privacy
 
 - Webcam permission is requested only after the player presses Enable.
 - Hand landmark detection runs in the browser using MediaPipe Tasks Vision.
@@ -72,7 +72,7 @@ Requirements: Node.js 20.19+ or 22.12+.
 
     git clone https://github.com/Chethan-ULTIMAX/GestureArcade.git
     cd GestureArcade
-    npm install
+    npm ci
     npm run dev
 
 Open the local Vite URL in a modern browser. For a production build, run:
@@ -80,7 +80,7 @@ Open the local Vite URL in a modern browser. For a production build, run:
     npm run build
     npm run preview
 
-Run the chess rules regression tests:
+Run the chess and carrom regression tests:
 
     npm test
 
@@ -92,11 +92,13 @@ Run the chess rules regression tests:
       vision/     Webcam + MediaPipe hand landmark runtime
       games/
         chess/    Chess UI, rules integration, gesture mapping and tests
+        carrom/   Carrom game, physics, gesture mapping and tests
       main.js     Arcade shell and navigation
       style.css   Arcade design system
     docs/
       ARCHITECTURE.md
       CHESS-GESTURE-CONTROLS.md
+      CARROM-GESTURE-CONTROLS.md
 
 ## Guiding architecture
 
