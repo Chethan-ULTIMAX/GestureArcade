@@ -2,12 +2,22 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>gesturearcade</title>
+    <meta name="theme-color" content="#0a0d12" />
+    <meta name="description" content="GestureArcade is a 3D gaming arena where your hands become the controller. Explore chess, carrom, air hockey, bowling and Jenga." />
+    <meta property="og:title" content="GestureArcade — Play beyond the screen" />
+    <meta property="og:description" content="Five familiar games. A new way to play. Your hands are the controller." />
+    <meta property="og:type" content="website" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <title>GestureArcade — Play beyond the screen</title>
   </head>
   <body>
-    <div id="app"></div>
+    <div id="app">
+      <div class="boot-screen" role="status" aria-label="Loading GestureArcade">
+        <span class="brand-mark brand-mark--large"><i></i><i></i><i></i></span>
+        <span>Waking up the arcade…</span>
+      </div>
+    </div>
     <script type="module" src="/src/main.js"></script>
   </body>
 </html>
