@@ -1,69 +1,110 @@
 # GestureArcade
 
-**Play beyond the screen.** GestureArcade is a 3D gaming arena where natural hand movements become game controls.
+**Play beyond the screen.** GestureArcade is a browser-based collection of games controlled with natural hand movement.
 
-Five familiar games. One shared gesture-input system.
+## Current status
 
-## The games
-
-| Game | Core interaction | Style |
+| Game | Status | Main interaction |
 |---|---|---|
-| Chess | Pinch, pick up and place pieces | Strategy |
-| Carrom | Aim, pull back and flick | Precision |
-| Air Hockey | Move a paddle with your palm | Reflex |
-| Bowling | Aim, swing and release | Motion |
-| Jenga | Pinch and slide blocks | Balance |
+| Chess | **Playable** | Pinch, pick up, move and release |
+| Carrom | Planned | Aim and flick |
+| Air Hockey | Planned | Palm-tracked paddle |
+| Bowling | Planned | Swing and release |
+| Jenga | Planned | Pinch and slide |
 
-> The arcade selection experience and shared runtime foundations are in place. Individual game modules are the next implementation phase; the cards are not playable games yet.
+The arcade shell and shared runtime are in place. Chess is the first complete game module; the other game cards remain previews until their modules are implemented.
 
-## Built with
+## Gesture Chess
 
-- Vite + vanilla JavaScript
-- Three.js
-- MediaPipe Tasks Vision
-- Browser webcam APIs
+Gesture Chess is a local two-player chess match with a perspective board and seven fixed camera presets:
 
-No framework or backend is required.
+1. White · top
+2. Black · top
+3. White · left
+4. White · right
+5. Black · left
+6. Black · right
+7. Top · middle
+
+The board uses a 2.5D presentation: raised piece styling, layered shadows and a perspective board plane. It is not a free-orbit 3D scene.
+
+### Standard chess rules
+
+The rules engine is chess.js 1.4.x. The game accepts only legal moves and supports:
+
+- Check, checkmate and stalemate
+- Castling on either side when the rules permit it
+- En passant
+- Promotion to queen, rook, bishop or knight
+- Move history and PGN export
+- Undo and reset
+- Draw detection, including threefold repetition, insufficient material and the fifty-move rule
+
+The game is local two-player (White and Black taking turns). It does not currently include a computer opponent or online multiplayer.
+
+### Hand controls
+
+Enable the camera from inside the chess game; it does not start automatically.
+
+| Gesture | Action |
+|---|---|
+| Point with index finger | Move the on-screen hand cursor |
+| Pinch thumb and index finger | Pick up the piece under the cursor |
+| Keep pinching and move | Carry the selected piece |
+| Release over a highlighted square | Place the piece if the move is legal |
+| Hold an open palm | Cancel the current selection |
+
+Legal empty destinations glow green. Capture destinations are marked red. The active turn controls which color of pieces can be selected, so after White moves, the next hand interaction is limited to Black's pieces.
+
+The hand cursor is smoothed and pinch transitions use separate grab/release thresholds to reduce jitter and accidental drops. A mouse/touch click-to-select and click-to-move fallback is also available.
+
+### Camera and privacy
+
+- Webcam permission is requested only after the player presses Enable.
+- Hand landmark detection runs in the browser using MediaPipe Tasks Vision.
+- The camera stream is not uploaded by this application.
+- Use localhost or HTTPS for webcam access.
+- Stop hand tracking from the camera panel or leave the game to stop the camera stream.
 
 ## Run locally
 
-```bash
-npm install
-npm run dev
-```
+Requirements: Node.js 20.19+ or 22.12+.
 
-Create a production build:
+    git clone https://github.com/Chethan-ULTIMAX/GestureArcade.git
+    cd GestureArcade
+    npm install
+    npm run dev
 
-```bash
-npm run build
-npm run preview
-```
+Open the local Vite URL in a modern browser. For a production build, run:
 
-Use localhost or HTTPS for webcam permissions. The camera is not started automatically; a future calibration/game flow must request permission only after the player chooses to enable it.
+    npm run build
+    npm run preview
+
+Run the chess rules regression tests:
+
+    npm test
 
 ## Project structure
 
-```text
-src/
-  core/       Shared 3D scene and game lifecycle
-  data/       Game registry and UI metadata
-  vision/     Webcam + MediaPipe hand landmark runtime
-  input/      Future semantic gesture recognition/mapping
-  games/      Independent game modules
-  shared/     Reusable physics, objects and utilities
-  ui/         Shared game UI components
-  main.js     Arcade shell and navigation
-  style.css   Design system and responsive styles
-docs/
-  ARCHITECTURE.md
-```
-
-Read [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) before adding a game. It defines the module lifecycle, gesture pipeline, input event contract and implementation order.
+    src/
+      core/       Shared 3D scene and game lifecycle
+      data/       Game registry and UI metadata
+      vision/     Webcam + MediaPipe hand landmark runtime
+      games/
+        chess/    Chess UI, rules integration, gesture mapping and tests
+      main.js     Arcade shell and navigation
+      style.css   Arcade design system
+    docs/
+      ARCHITECTURE.md
+      CHESS-GESTURE-CONTROLS.md
 
 ## Guiding architecture
 
-Track hands once. Recognize gestures once. Map semantic actions into each game independently. Every game must clean up its animation loops, event listeners, scene resources and camera usage when it closes.
+Track hands once. Interpret gestures once. Map those gestures into each game independently. Every game must stop its camera use, animation loops, event listeners and owned resources when it closes.
 
-## Repository
+## License notes
 
-https://github.com/Chethan-ULTIMAX/GestureArcade
+- GestureArcade source code: repository license applies.
+- chess.js: BSD-2-Clause.
+- Three.js: MIT.
+- MediaPipe Tasks Vision: Apache-2.0.

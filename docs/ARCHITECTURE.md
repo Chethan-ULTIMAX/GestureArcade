@@ -4,13 +4,14 @@
 
 GestureArcade is the gesture-controlled gaming arena. It owns the game-selection experience, shared 3D runtime, webcam/hand-landmark input, common gesture vocabulary, and game lifecycle. It is independent from the Engineering Lab and Spatial Interaction Lab projects.
 
-The landing page is a real working shell. The five cards currently describe the intended game interactions and expose their build checklists. The five actual game modules are **not implemented yet**; do not label the games as playable until their modules are registered and tested.
+The landing page is a real working shell. Gesture Chess is the first registered playable module: local two-player standard chess rules, 2.5D presentation, seven fixed camera views, and optional MediaPipe pinch controls. Carrom, Air Hockey, Bowling and Jenga remain previews until their own modules are implemented and tested.
 
 ## Current stack
 
 - Vite + vanilla JavaScript (ES modules)
 - Three.js for 3D scenes and rendering
 - MediaPipe Tasks Vision for hand landmarks
+- chess.js for standard chess rules and legal-move validation
 - Browser MediaDevices API for explicit webcam access
 - No framework, backend, account system, paid API, or server-side dependency
 

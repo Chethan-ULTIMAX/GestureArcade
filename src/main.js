@@ -1,6 +1,8 @@
 import "./style.css";
 import { GAMES, FILTERS, getGameById } from "./data/games.js";
 import { ArcadeScene } from "./core/ArcadeScene.js";
+import { GameManager } from "./core/GameManager.js";
+import { ChessGame } from "./games/chess/ChessGame.js";
 
 const app = document.querySelector("#app");
 const PRIORITY_KEY = "gesturearcade:priority-games";
@@ -125,14 +127,15 @@ function renderDialog(game) {
           </div>
         </div>
         <div class="dialog-section build-section">
-          <div class="build-heading"><h3>GAME MODULE CHECKLIST</h3><span class="build-status">FOUNDATION PHASE</span></div>
+          <div class="build-heading"><h3>GAME MODULE CHECKLIST</h3><span class="build-status">${game.id === "chess" ? "PLAYABLE" : "IN QUEUE"}</span></div>
           <ul>${game.buildNotes.map((note) => `<li>${icon("check")}${note}</li>`).join("")}</ul>
         </div>
         <div class="dialog-actions">
-          <button class="button button--primary" type="button" data-toggle-priority="${game.id}">
+          ${game.id === "chess" ? '<button class="button button--primary" type="button" data-play-game="chess">♟ Start Gesture Chess ↗</button>' : ""}
+          <button class="button button--secondary" type="button" data-toggle-priority="${game.id}">
             ${priority ? icon("check") + " Added to priorities" : icon("spark") + " Make this a priority"}
           </button>
-          <span class="dialog-footnote">Gameplay module is the next build phase.</span>
+          <span class="dialog-footnote">${game.id === "chess" ? "Standard rules · Local two-player · Webcam optional" : "Gameplay module is in the build queue."}</span>
         </div>
       </div>
     </div>`;
@@ -246,15 +249,15 @@ app.innerHTML = `
       <div class="build-copy">
         <div class="section-kicker"><span>03</span> IN THE WORKSHOP <i></i> PROJECT STATUS</div>
         <h2>The foundation<br />is <em>in motion.</em></h2>
-        <p>The arcade shell, shared scene and gesture-runtime boundaries are in place. Next comes the first playable game — then the rest join the same system.</p>
+        <p>The arcade shell and shared input boundaries are in place. Gesture Chess is now the first playable module, with four more games joining the same interaction system next.</p>
         <a class="button button--dark" href="https://github.com/Chethan-ULTIMAX/GestureArcade" target="_blank" rel="noreferrer">Follow the build on GitHub ${icon("arrowUpRight")}</a>
       </div>
       <div class="build-board">
         <div class="build-board-top"><span>BUILD ROADMAP</span><span>PHASE 01 — 04</span></div>
         <div class="roadmap-item is-done"><span class="roadmap-check">${icon("check")}</span><div><strong>Arcade foundation</strong><small>Navigation, game registry, UI system</small></div><span class="roadmap-state">READY</span></div>
         <div class="roadmap-item is-done"><span class="roadmap-check">${icon("check")}</span><div><strong>Shared 3D + input boundaries</strong><small>Three.js stage, camera runtime contract</small></div><span class="roadmap-state">READY</span></div>
-        <div class="roadmap-item is-next"><span class="roadmap-check">03</span><div><strong>First playable game</strong><small>Game loop, object interaction, feedback</small></div><span class="roadmap-state">NEXT</span></div>
-        <div class="roadmap-item"><span class="roadmap-check">04</span><div><strong>Five-game arcade</strong><small>Shared controls, polish, performance pass</small></div><span class="roadmap-state">QUEUED</span></div>
+        <div class="roadmap-item is-done"><span class="roadmap-check">${icon("check")}</span><div><strong>Gesture Chess</strong><small>Standard rules, hand control, seven views</small></div><span class="roadmap-state">READY</span></div>
+        <div class="roadmap-item is-next"><span class="roadmap-check">04</span><div><strong>Four more game modules</strong><small>Carrom, air hockey, bowling and Jenga</small></div><span class="roadmap-state">NEXT</span></div>
         <div class="build-board-foot"><span class="status-pulse"></span> FOUNDATION BRANCH / MAIN</div>
       </div>
     </section>
@@ -270,6 +273,11 @@ app.innerHTML = `
 `;
 
 const scene = new ArcadeScene(document.querySelector("#hero-canvas"));
+const gameHost = document.createElement("div");
+gameHost.id = "game-host";
+document.body.appendChild(gameHost);
+const gameManager = new GameManager();
+gameManager.register("chess", new ChessGame());
 renderGrid();
 
 const dialog = document.querySelector("#game-dialog");
@@ -313,6 +321,16 @@ document.querySelector("#empty-state").addEventListener("click", (event) => {
 });
 
 dialog.addEventListener("click", (event) => {
+  const playButton = event.target.closest("[data-play-game]");
+  if (playButton) {
+    const gameId = playButton.dataset.playGame;
+    dialog.close();
+    gameManager.launch(gameId, gameHost).catch((error) => {
+      console.error("Could not launch " + gameId + ":", error);
+      window.alert("The chess game could not start. Check the browser console for details.");
+    });
+    return;
+  }
   if (event.target === dialog || event.target.closest("[data-close-dialog]")) {
     dialog.close();
     return;
@@ -352,4 +370,8 @@ document.addEventListener("keydown", (event) => {
   }
 });
 
-window.addEventListener("pagehide", () => scene?.dispose(), { once: true });
+window.addEventListener("pagehide", () => {
+  scene?.dispose();
+  void gameManager.dispose();
+  gameHost.remove();
+}, { once: true });

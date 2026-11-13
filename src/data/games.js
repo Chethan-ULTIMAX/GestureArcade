@@ -4,7 +4,7 @@ export const GAMES = [
     number: "01",
     name: "Chess",
     tagline: "Think three moves ahead.",
-    description: "A classic strategy duel reimagined in a tactile 3D board. Reach in, lift a piece, and place it exactly where your next move lives.",
+    description: "A complete standard-rules chess match with perspective camera presets, crisp legal-move feedback, and pinch-to-pick-up hand control. Play locally with White and Black taking turns.",
     category: "tabletop",
     categoryLabel: "TABLETOP",
     players: "1–2 PLAYERS",
@@ -13,14 +13,15 @@ export const GAMES = [
     badge: "STRATEGY",
     interaction: "Pick up & place",
     controls: [
-      { gesture: "Pinch", action: "Grab a chess piece" },
-      { gesture: "Move your hand", action: "Move the piece across the board" },
-      { gesture: "Release", action: "Place the piece on a square" }
+      { gesture: "Point", action: "Hover over a piece or destination square" },
+      { gesture: "Pinch & hold", action: "Pick up a piece and carry it" },
+      { gesture: "Release", action: "Place it on a highlighted legal square" },
+      { gesture: "Open palm", action: "Cancel the current selection" }
     ],
     buildNotes: [
-      "Board coordinates mapped to a 3D plane",
-      "Legal move validation and turn management",
-      "Piece selection, drag preview and snap-to-square"
+      "Standard chess rules: legal moves, check, checkmate and draws",
+      "Castling, en passant, four-way promotion and complete turn history",
+      "Seven fixed camera views, 2.5D pieces and gesture-driven moves"
     ],
     art: "chess"
   },
